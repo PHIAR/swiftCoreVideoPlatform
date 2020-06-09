@@ -1,5 +1,7 @@
 import Foundation
 
+public typealias OSType = UInt32
+
 public final class CVPixelBuffer {
     internal let width: Int
     internal let height: Int
@@ -11,6 +13,7 @@ public final class CVPixelBuffer {
     }
 }
 
+public let kCVPixelFormatType_32BGRA = UInt32(0x42475241)
 public let kCVPixelBufferMetalCompatibilityKey = "CVPixelBufferMetalCompatibility"
 
 public func CVPixelBufferGetHeight(_ pixelBuffer: CVPixelBuffer) -> Int {

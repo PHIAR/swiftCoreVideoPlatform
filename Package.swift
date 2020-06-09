@@ -1,28 +1,45 @@
 // swift-tools-version:5.2
-// The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import PackageDescription
 
-let package = Package(
-    name: "CoreVideo",
-    products: [
-        // Products define the executables and libraries produced by a package, and make them visible to other packages.
-        .library(
-            name: "CoreVideo",
-            targets: ["CoreVideo"]),
-    ],
-    dependencies: [
-        // Dependencies declare other packages that this package depends on.
-        // .package(url: /* package url */, from: "1.0.0"),
-    ],
-    targets: [
-        // Targets are the basic building blocks of a package. A target can define a module or a test suite.
-        // Targets can depend on other targets in this package, and on products in packages which this package depends on.
-        .target(
-            name: "CoreVideo",
-            dependencies: []),
-        .testTarget(
-            name: "CoreVideoTests",
-            dependencies: ["CoreVideo"]),
-    ]
-)
+let package = Package(name: "CoreVideo",
+                      products: [
+                          .library(name: "AVFoundation",
+                                   targets: [
+                                       "AVFoundation",
+                                   ]),
+                          .library(name: "CoreMedia",
+                                   targets: [
+                                       "CoreMedia",
+                                   ]),
+                          .library(name: "CoreVideo",
+                                   targets: [
+                                       "CoreVideo",
+                                   ]),
+                          .library(name: "VideoToolbox",
+                                   targets: [
+                                       "VideoToolbox",
+                                   ]),
+                      ],
+                      dependencies: [
+                      ],
+                      targets: [
+                          .target(name: "AVFoundation",
+                                  dependencies: [
+                                      "CoreMedia",
+                                      "CoreVideo",
+                                  ]),
+                          .target(name: "CoreMedia",
+                                  dependencies: [
+                                  ]),
+                          .target(name: "CoreVideo",
+                                  dependencies: [
+                                  ]),
+                          .target(name: "VideoToolbox",
+                                  dependencies: [
+                                  ]),
+                          .testTarget(name: "CoreVideoTests",
+                                      dependencies: [
+                                          "CoreVideo",
+                                      ]),
+                      ])
