@@ -31,6 +31,7 @@ let package = Package(name: "CoreVideo",
                                   ]),
                           .target(name: "CoreMedia",
                                   dependencies: [
+                                      "CoreVideo",
                                   ]),
                           .target(name: "CoreVideo",
                                   dependencies: [
