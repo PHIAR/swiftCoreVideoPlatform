@@ -22,6 +22,8 @@ let package = Package(name: "CoreVideo",
                                    ]),
                       ],
                       dependencies: [
+                          .package(url: "https://github.com/PHIAR/swiftMetalPlatform.git",
+                          .branch("master")),
                       ],
                       targets: [
                           .target(name: "AVFoundation",
@@ -35,6 +37,8 @@ let package = Package(name: "CoreVideo",
                                   ]),
                           .target(name: "CoreVideo",
                                   dependencies: [
+                                      .product(name: "Metal",
+                                              package: "swiftMetalPlatform"),
                                   ]),
                           .target(name: "VideoToolbox",
                                   dependencies: [

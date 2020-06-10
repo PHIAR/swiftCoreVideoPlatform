@@ -17,8 +17,17 @@ public func CVPixelBufferGetHeight(_ pixelBuffer: CVPixelBuffer) -> Int {
     return pixelBuffer.height
 }
 
+
+public func CVPixelBufferGetHeightOfPlane(_ pixelBuffer: CVPixelBuffer,
+                                          _ planeIndex: Int) -> Int {
+    return pixelBuffer.height
+}
+
 public func CVPixelBufferGetWidth(_ pixelBuffer: CVPixelBuffer) -> Int {
     return pixelBuffer.width
 }
 
-
+public func CVPixelBufferGetWidthOfPlane(_ pixelBuffer: CVPixelBuffer,
+                                         _ planeIndex: Int) -> Int {
+    return pixelBuffer.width
+}
