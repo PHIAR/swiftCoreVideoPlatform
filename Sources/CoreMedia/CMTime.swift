@@ -1,5 +1,14 @@
 import Foundation
 
+// MARK - Dispatch time conversions
+
+public let NSEC_PER_SEC = UInt64(1000000000)
+public let NSEC_PER_MSEC = NSEC_PER_SEC / USEC_PER_SEC * 1000
+public let NSEC_PER_USEC = NSEC_PER_SEC / USEC_PER_SEC
+public let USEC_PER_SEC = UInt64(1000000)
+
+// MARK - Time API
+
 public typealias CMTimeScale = Int32
 public typealias CMTimeValue = Int64
 
