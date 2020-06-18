@@ -13,6 +13,10 @@ let platforms: [SupportedPlatform] = [
 let package = Package(name: "CoreVideo",
                       platforms: platforms,
                       products: [
+                          .executable(name: "CameraConcept",
+                                      targets: [
+                                          "CameraConcept",
+                                      ]),
                           .library(name: "AVFoundation",
                                    type: .dynamic,
                                    targets: [
@@ -27,6 +31,16 @@ let package = Package(name: "CoreVideo",
                                    type: .dynamic,
                                    targets: [
                                        "CoreVideo",
+                                   ]),
+                          .library(name: "VCDI_NDKCamera2",
+                                   type: .dynamic,
+                                   targets: [
+                                       "VCDI_NDKCamera2",
+                                   ]),
+                          .library(name: "VCDI_V4L2",
+                                   type: .dynamic,
+                                   targets: [
+                                       "VCDI_V4L2",
                                    ]),
                           .library(name: "VideoToolbox",
                                    type: .dynamic,
@@ -44,6 +58,10 @@ let package = Package(name: "CoreVideo",
                                       "CoreMedia",
                                       "CoreVideo",
                                   ]),
+                          .target(name: "CameraConcept",
+                                  dependencies: [
+                                      "AVFoundation",
+                                  ]),
                           .target(name: "CoreMedia",
                                   dependencies: [
                                       "CoreVideo",
@@ -52,6 +70,15 @@ let package = Package(name: "CoreVideo",
                                   dependencies: [
                                       .product(name: "Metal",
                                               package: "swiftMetalPlatform"),
+                                  ]),
+                          .target(name: "CVideoCaptureDriverInterface"),
+                          .target(name: "VCDI_NDKCamera2",
+                                  dependencies: [
+                                      "CVideoCaptureDriverInterface",
+                                  ]),
+                          .target(name: "VCDI_V4L2",
+                                  dependencies: [
+                                      "CVideoCaptureDriverInterface",
                                   ]),
                           .target(name: "VideoToolbox",
                                   dependencies: [
