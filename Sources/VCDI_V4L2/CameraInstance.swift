@@ -8,22 +8,18 @@ internal final class CameraInstance {
 
     private let fd: Int32
     private let capability: v4l2_capability
-    private let cropCapability: v4l2_cropcap
     private let format: v4l2_format
     private let buffers: [MappedBuffer]
 
     private static func v4l2_ioctl(fd: Int32,
                                    request: video_ioctl_request_e,
                                    arg: UnsafeMutableRawPointer) -> Int32 {
-        var result = Int32(-1)
+        var result = Int32(0)
 
-        while result == -1 {
+        repeat {
             result = ioctl_1_arg(fd, request, arg)
-
-            guard errno != EINTR else {
-                break
-            }
-        }
+        } while (result == -1) &&
+                (errno == EINTR)
 
         return result
     }
@@ -38,15 +34,9 @@ internal final class CameraInstance {
             preconditionFailure("Failed to query device capabilities.")
         }
 
-        var cropCapability = v4l2_cropcap()
-
-        guard CameraInstance.v4l2_ioctl(fd: fd,
-                                        request: video_ioctl_request_crop_cap,
-                                        arg: &cropCapability) != -1 else {
-            preconditionFailure("Failed to query device crop capability.")
-        }
-
         var format = v4l2_format()
+
+        format.type = UInt32(V4L2_BUF_TYPE_VIDEO_CAPTURE.rawValue)
 
         guard CameraInstance.v4l2_ioctl(fd: fd,
                                         request: video_ioctl_request_get_format,
@@ -96,7 +86,6 @@ internal final class CameraInstance {
 
         self.fd = fd
         self.capability = capability
-        self.cropCapability = cropCapability
         self.format = format
         self.buffers = buffers
     }

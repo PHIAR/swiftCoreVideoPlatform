@@ -6,7 +6,8 @@ internal var instances: [VCDIInstance] = []
 @_cdecl("vcdi_main")
 public func vcdi_main(_ instance: UnsafeMutablePointer <vcdi_instance_t>) {
     let registerInstance = instance.pointee.register_instance
-    let _instance = VCDIInstance(instanceHandle: instance.pointee.instance_handle)
+    let instanceHandle = instance.pointee.instance_handle
+    let _instance = VCDIInstance(instanceHandle: instanceHandle)
     let result: Bool = _instance.vendorName.withCString { vendorName in
         var instanceRegistrationData = vcdi_instance_registration_data_t(context: UnsafeMutableRawPointer(bitPattern: instances.count + 1)!,
                                                                          vendor_name: vendorName,
@@ -14,7 +15,7 @@ public func vcdi_main(_ instance: UnsafeMutablePointer <vcdi_instance_t>) {
                                                                          request_authorization: _instance.requestAuthorization,
                                                                          open_session: _instance.openSession)
 
-        return registerInstance(&instanceRegistrationData)
+        return registerInstance(instanceHandle, &instanceRegistrationData)
     }
 
     guard result else {

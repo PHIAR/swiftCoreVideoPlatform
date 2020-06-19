@@ -62,6 +62,7 @@ let package = Package(name: "CoreVideo",
                           .target(name: "CameraConcept",
                                   dependencies: [
                                       "AVFoundation",
+                                      "CVideoCaptureDriverInterface",
                                   ]),
                           .target(name: "CoreMedia",
                                   dependencies: [

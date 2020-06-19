@@ -85,7 +85,8 @@ typedef struct vcdi_instance_t {
     void *instance_handle;
 
     // Register instance callback and populate vcdi_instance_registration_data_t on success.
-    bool (*register_instance)(vcdi_instance_registration_data_t *data);
+    bool (*register_instance)(void *instance_handle,
+                              vcdi_instance_registration_data_t *data);
 } vcdi_instance_t;
 
 // Main entrypoint interface definition
