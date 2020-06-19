@@ -5,6 +5,7 @@ import Glibc
 internal final class VCDIInstance {
     private static let defaultVideoNode = 0
     private static let defaultDeviceNode = "/dev/video\(VCDIInstance.defaultVideoNode)"
+    private static let defaultNumberOfBuffers = 4
 
     private let instanceHandle: UnsafeMutableRawPointer
     private let cameraInstance: CameraInstance
@@ -28,6 +29,7 @@ internal final class VCDIInstance {
         precondition(fd != -1)
 
         self.instanceHandle = instanceHandle
-        self.cameraInstance = CameraInstance(fd: fd)
+        self.cameraInstance = CameraInstance(fd: fd,
+                                             numberOfBuffers: VCDIInstance.defaultNumberOfBuffers)
     }
 }
