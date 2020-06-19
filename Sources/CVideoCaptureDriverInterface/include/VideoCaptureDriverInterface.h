@@ -51,32 +51,40 @@ typedef enum vcdi_instance_type_e {
 
 typedef struct vcdi_instance_session_t {
     // Vendor driver context
-    void *context;
+    void * NULL_UNSPECIFIED context;
+
+    // Start video capture stream
+    bool (* NULL_UNSPECIFIED start_capture)(struct vcdi_instance_session_t *session);
+
+    // Stop video capture stream
+    bool (* NULL_UNSPECIFIED stop_capture)(struct vcdi_instance_session_t *session);
 
     // Session termination callback
-    void (*close_session)(struct vcdi_instance_session_t *session);
+    // NB: Context is cleared on completion.
+    void (* NULL_UNSPECIFIED close_session)(struct vcdi_instance_session_t *session);
 
     // Pixel buffer capture callback
-    void (*register_camera_callback)(void);
+    void (* NULL_UNSPECIFIED register_camera_callback)(void);
 } vcdi_instance_session_t;
 
 typedef bool (vcdi_instance_requestion_authorization_t)(void *context);
 
-typedef vcdi_instance_session_t * NULLABLE_RETURN (vcdi_instance_open_session_t)(void *context);
+typedef bool (vcdi_instance_open_session_t)(void *context,
+                                            vcdi_instance_session_t *instance_session);
 
 typedef struct vcdi_instance_registration_data_t {
     // Vendor driver context
-    void *context;
+    void * NULL_UNSPECIFIED context;
 
     // Vendor device unique name
-    char const *vendor_name;
+    char const * NULL_UNSPECIFIED  vendor_name;
 
     // Vendor device instance type
     vcdi_instance_type_e instance_type;
 
     // Callbacks
-    vcdi_instance_requestion_authorization_t *request_authorization;
-    vcdi_instance_open_session_t *open_session;
+    vcdi_instance_requestion_authorization_t * NULL_UNSPECIFIED request_authorization;
+    vcdi_instance_open_session_t * NULL_UNSPECIFIED open_session;
 } vcdi_instance_registration_data_t;
 
 // Per instance data

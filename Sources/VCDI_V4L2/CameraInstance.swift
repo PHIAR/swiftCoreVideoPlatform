@@ -97,4 +97,24 @@ internal final class CameraInstance {
 
         close(self.fd)
     }
+
+    internal func requestAuthorization() -> Bool {
+        return true
+    }
+
+    internal func startCapture() -> Bool {
+        var type = V4L2_BUF_TYPE_VIDEO_CAPTURE
+
+        return CameraInstance.v4l2_ioctl(fd: fd,
+                                         request: video_ioctl_request_stream_on,
+                                         arg: &type) != -1
+    }
+
+    internal func stopCapture() -> Bool {
+        var type = V4L2_BUF_TYPE_VIDEO_CAPTURE
+
+        return CameraInstance.v4l2_ioctl(fd: fd,
+                                         request: video_ioctl_request_stream_off,
+                                         arg: &type) != -1
+    }
 }

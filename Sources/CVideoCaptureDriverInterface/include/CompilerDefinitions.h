@@ -15,6 +15,7 @@
 #endif
 
 #define EXPORT_SYMBOL __attribute__ ((visibility ("default")))
+#define NULL_UNSPECIFIED _Null_unspecified
 #define NULLABLE _Nullable
 #define NONNULL _Nonnull
 #define NULLABLE_RETURN NULLABLE

@@ -1,26 +1,18 @@
 import CVideoCaptureDriverInterface
 import Foundation
 
-internal var instances: [VCDIInstance] = []
-
 @_cdecl("vcdi_main")
 public func vcdi_main(_ instance: UnsafeMutablePointer <vcdi_instance_t>) {
     let registerInstance = instance.pointee.register_instance
     let instanceHandle = instance.pointee.instance_handle
     let _instance = VCDIInstance(instanceHandle: instanceHandle)
-    let result: Bool = _instance.vendorName.withCString { vendorName in
-        var instanceRegistrationData = vcdi_instance_registration_data_t(context: UnsafeMutableRawPointer(bitPattern: instances.count + 1)!,
-                                                                         vendor_name: vendorName,
-                                                                         instance_type: vcdi_instance_type_hardware_color_camera,
-                                                                         request_authorization: _instance.requestAuthorization,
-                                                                         open_session: _instance.openSession)
+    let context = _instance.toUnsafeMutableRawPointer(retained: true)
+    var instanceRegistrationData = vcdi_instance_registration_data_t(context: context,
+                                                                     vendor_name: _instance.vendorName,
+                                                                     instance_type: vcdi_instance_type_hardware_color_camera,
+                                                                     request_authorization: _instance.requestAuthorization,
+                                                                     open_session: _instance.openSession)
+    let registeredInstance = registerInstance(instanceHandle, &instanceRegistrationData)
 
-        return registerInstance(instanceHandle, &instanceRegistrationData)
-    }
-
-    guard result else {
-        return
-    }
-
-    instances.append(_instance)
+    precondition(registeredInstance, "Failed to register driver instance.")
 }

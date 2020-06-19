@@ -14,6 +14,8 @@ typedef enum video_ioctl_request_e {
     video_ioctl_request_request_buffers = VIDIOC_REQBUFS,
     video_ioctl_request_set_crop = VIDIOC_S_CROP,
     video_ioctl_request_set_format = VIDIOC_S_FMT,
+    video_ioctl_request_stream_off = VIDIOC_STREAMOFF,
+    video_ioctl_request_stream_on = VIDIOC_STREAMON,
 } video_ioctl_request_e;
 
 // Convenience helpers
