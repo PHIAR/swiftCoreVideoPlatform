@@ -1,0 +1,5 @@
+module CV4L2 {
+    umbrella header "CV4L2.h"
+    export *
+    module * { export * }
+}

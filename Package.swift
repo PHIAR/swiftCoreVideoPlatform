@@ -53,6 +53,7 @@ let package = Package(name: "CoreVideo",
                           .branch("master")),
                       ],
                       targets: [
+                          .systemLibrary(name: "CV4L2"),
                           .target(name: "AVFoundation",
                                   dependencies: [
                                       "CoreMedia",
@@ -78,6 +79,7 @@ let package = Package(name: "CoreVideo",
                                   ]),
                           .target(name: "VCDI_V4L2",
                                   dependencies: [
+                                      "CV4L2",
                                       "CVideoCaptureDriverInterface",
                                   ]),
                           .target(name: "VideoToolbox",
