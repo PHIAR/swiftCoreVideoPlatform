@@ -145,6 +145,16 @@ public final class AVCaptureDevice {
     }
 }
 
+private extension AVCaptureDevice {
+    func toUnsafeMutableRawPointer(retained: Bool = false) -> UnsafeMutableRawPointer {
+        guard retained else {
+            return UnsafeMutableRawPointer(Unmanaged.passUnretained(self).toOpaque())
+        }
+
+        return UnsafeMutableRawPointer(Unmanaged.passRetained(self).toOpaque())
+    }
+}
+
 private extension UnsafeMutableRawPointer {
     func toAVCaptureDevice(retained: Bool = false) -> AVCaptureDevice {
         guard retained else {
@@ -155,12 +165,12 @@ private extension UnsafeMutableRawPointer {
     }
 }
 
-private extension AVCaptureDevice {
-    func toUnsafeMutableRawPointer(retained: Bool = false) -> UnsafeMutableRawPointer {
-        guard retained else {
-            return UnsafeMutableRawPointer(Unmanaged.passUnretained(self).toOpaque())
-        }
+internal extension AVCaptureDevice {
+    func startCapture() {
+        self.instanceSession.start_capture(&self.instanceSession)
+    }
 
-        return UnsafeMutableRawPointer(Unmanaged.passRetained(self).toOpaque())
+    func stopCapture() {
+        self.instanceSession.stop_capture(&self.instanceSession)
     }
 }

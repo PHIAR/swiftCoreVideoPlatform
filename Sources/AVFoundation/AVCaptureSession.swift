@@ -1,3 +1,4 @@
+import Dispatch
 import Foundation
 
 public final class AVCaptureSession {
@@ -16,6 +17,10 @@ public final class AVCaptureSession {
         }
     }
 
+    private let executionQueue = DispatchQueue(label: "AVCaptureSession.executionQueue")
+    private var inputs: [AVCaptureInput] = []
+    private var outputs: [AVCaptureOutput] = []
+
     public var sessionPreset: AVCaptureSession.Preset {
         get {
             preconditionFailure()
@@ -30,28 +35,36 @@ public final class AVCaptureSession {
     }
 
     public func addInput(_ input: AVCaptureInput) {
+        self.executionQueue.sync {
+            self.inputs.append(input)
+        }
     }
 
-    public func addOutput(_ input: AVCaptureOutput) {
+    public func addOutput(_ output: AVCaptureOutput) {
+        self.executionQueue.sync {
+            self.outputs.append(output)
+        }
     }
 
     public func beginConfiguration() {
     }
 
     public func canAddInput(_ input: AVCaptureInput) -> Bool {
-        return false
+        return true
     }
 
     public func canAddOutput(_ input: AVCaptureOutput) -> Bool {
-        return false
+        return true
     }
 
     public func commitConfiguration() {
     }
 
     public func startRunning() {
+        self.inputs.forEach { $0.startCapture() }
     }
 
     public func stopRunning() {
+        self.inputs.forEach { $0.stopCapture() }
     }
 }
