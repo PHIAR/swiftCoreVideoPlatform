@@ -50,7 +50,9 @@ let package = Package(name: "CoreVideo",
                       ],
                       dependencies: [
                           .package(url: "https://github.com/PHIAR/swiftMetalPlatform.git",
-                          .branch("master")),
+                                   .branch("master")),
+                          .package(url: "https://github.com/PHIAR/swiftSDL2.git",
+                                   .branch("master")),
                       ],
                       targets: [
                           .systemLibrary(name: "CV4L2"),
@@ -61,6 +63,7 @@ let package = Package(name: "CoreVideo",
                                   ]),
                           .target(name: "CameraConcept",
                                   dependencies: [
+                                      "swiftSDL2",
                                       "AVFoundation",
                                       "CVideoCaptureDriverInterface",
                                   ]),

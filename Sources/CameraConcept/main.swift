@@ -1,3 +1,4 @@
+import swiftSDL2
 import AVFoundation
 import Foundation
 import CVideoCaptureDriverInterface
@@ -41,7 +42,7 @@ private var runtimeRegistrationData = vcdi_instance_registration_data_t()
 
 private let registerInstance: @convention(c) (UnsafeMutableRawPointer,
                                               UnsafeMutablePointer <vcdi_instance_registration_data_t>) -> Bool = { runtimeInstance, registrationData in
-    let _runtimeInstance = runtimeInstance.toRuntimeInstance()
+    let _ = runtimeInstance.toRuntimeInstance()
 
     runtimeRegistrationData = registrationData.pointee
     return true
@@ -61,5 +62,24 @@ var instanceSession = vcdi_instance_session_t()
 
 result = runtimeRegistrationData.open_session(runtimeRegistrationData.context, &instanceSession)
 precondition(result)
+
+let window = Window(title: "Hello World!",
+                            x: 0,
+                            y: 0,
+                            width: 640,
+                            height: 480,
+                            flags: .shown)
+
+SDL2.eventLoop { event in
+    switch event.type {
+    case SDL_KEYDOWN.rawValue:
+        return false
+
+    default:
+        break
+    }
+
+    return true
+}
 
 instanceSession.close_session(&instanceSession)
