@@ -1,5 +1,6 @@
 @_exported import CoreMedia
 @_exported import CoreVideo
+import CVideoCaptureDriverInterface
 import Foundation
 
 public enum AVMediaType {
@@ -33,17 +34,27 @@ public final class AVCaptureDevice {
     }
 
     public final class DiscoverySession {
-        private init() {
+        private let _devices: [AVCaptureDevice]
+
+        private init(devices: [AVCaptureDevice]) {
+            self._devices = devices
         }
 
         public var devices: [AVCaptureDevice] {
-            preconditionFailure()
+            return self._devices
         }
 
         public convenience init(deviceTypes: [AVCaptureDevice.DeviceType],
                                 mediaType: AVMediaType?,
                                 position: AVCaptureDevice.Position) {
-            self.init()
+            let library = dlopen("libVCDI_V4L2.so", RTLD_NOW)
+            let entrypoint = unsafeBitCast(dlsym(library, "vcdi_main"),
+                                           to: (@convention (c) (UnsafeMutableRawPointer) -> Bool).self)
+            let devices = [
+                AVCaptureDevice(entrypoint: entrypoint),
+            ]
+
+            self.init(devices: devices)
         }
     }
 
@@ -56,6 +67,17 @@ public final class AVCaptureDevice {
             preconditionFailure()
         }
     }
+
+    private static let registerInstance: @convention(c) (UnsafeMutableRawPointer,
+                                                         UnsafeMutablePointer <vcdi_instance_registration_data_t>) -> Bool = { runtimeInstance, registrationData in
+        let captureDevice = runtimeInstance.toAVCaptureDevice()
+
+        captureDevice.runtimeRegistrationData = registrationData.pointee
+        return true
+    }
+
+    private var runtimeRegistrationData = vcdi_instance_registration_data_t()
+    private var instanceSession = vcdi_instance_session_t()
 
     public var activeFormat: AVCaptureDevice.Format {
         get {
@@ -96,9 +118,49 @@ public final class AVCaptureDevice {
         completionHandler(true)
     }
 
+    internal init(entrypoint: @convention (c) (UnsafeMutableRawPointer) -> Bool) {
+        var instance = vcdi_instance_t(instance_handle: self.toUnsafeMutableRawPointer(),
+                                       register_instance: AVCaptureDevice.registerInstance)
+        var result = entrypoint(&instance)
+
+        result = self.runtimeRegistrationData.request_authorization(runtimeRegistrationData.context)
+        precondition(result)
+
+        var instanceSession = vcdi_instance_session_t()
+
+        result = runtimeRegistrationData.open_session(runtimeRegistrationData.context, &instanceSession)
+        precondition(result)
+
+        self.instanceSession = instanceSession
+    }
+
+    deinit {
+        self.instanceSession.close_session(&instanceSession)
+    }
+
     public func lockForConfiguration() throws {
     }
 
     public func unlockForConfiguration() {
+    }
+}
+
+private extension UnsafeMutableRawPointer {
+    func toAVCaptureDevice(retained: Bool = false) -> AVCaptureDevice {
+        guard retained else {
+            return Unmanaged <AVCaptureDevice>.fromOpaque(UnsafeRawPointer(self)!).takeUnretainedValue()
+        }
+
+        return Unmanaged <AVCaptureDevice>.fromOpaque(UnsafeRawPointer(self)!).takeRetainedValue()
+    }
+}
+
+private extension AVCaptureDevice {
+    func toUnsafeMutableRawPointer(retained: Bool = false) -> UnsafeMutableRawPointer {
+        guard retained else {
+            return UnsafeMutableRawPointer(Unmanaged.passUnretained(self).toOpaque())
+        }
+
+        return UnsafeMutableRawPointer(Unmanaged.passRetained(self).toOpaque())
     }
 }
