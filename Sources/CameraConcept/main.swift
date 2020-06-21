@@ -63,6 +63,27 @@ var instanceSession = vcdi_instance_session_t()
 result = runtimeRegistrationData.open_session(runtimeRegistrationData.context, &instanceSession)
 precondition(result)
 
+var frameIndex = 0
+let cameraCallback: @convention(c) (_ context: UnsafeMutableRawPointer,
+                                    _ pointer: UnsafeMutableRawPointer,
+                                    _ size: Int) -> Void = { context, pointer, size in
+    guard frameIndex < 10 else {
+        return
+    }
+
+    let data = Data(bytes: pointer,
+                    count: size)
+    let url = URL(fileURLWithPath: "frame\(frameIndex).yuv")
+
+    try! data.write(to: url)
+    frameIndex += 1
+}
+
+instanceSession.register_camera_callback(&instanceSession,
+                                         UnsafeMutableRawPointer(bitPattern: 1)!,
+                                         cameraCallback)
+
+let _ = instanceSession.start_capture(&instanceSession)
 let window = Window(title: "Hello World!",
                             x: 0,
                             y: 0,
@@ -81,5 +102,7 @@ SDL2.eventLoop { event in
 
     return true
 }
+
+let _ = instanceSession.stop_capture(&instanceSession)
 
 instanceSession.close_session(&instanceSession)

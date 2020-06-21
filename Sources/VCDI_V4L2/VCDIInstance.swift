@@ -42,6 +42,7 @@ internal final class VCDIInstance {
 
         instanceSession.pointee.context = context
         instanceSession.pointee.close_session = instance.closeSession
+        instanceSession.pointee.register_camera_callback = instance.registerPixelbufferCallback
         instanceSession.pointee.start_capture = instance.startCapture
         instanceSession.pointee.stop_capture = instance.stopCapture
         return true
@@ -49,6 +50,15 @@ internal final class VCDIInstance {
 
     internal var requestAuthorization: @convention(c) (UnsafeMutableRawPointer) -> Bool = { context in
         return context.toInstance().cameraInstance.requestAuthorization()
+    }
+
+    internal var registerPixelbufferCallback: @convention(c) (UnsafeMutablePointer <vcdi_instance_session_t>,
+                                                              UnsafeMutableRawPointer,
+                                                              @convention (c) @escaping (_ context: UnsafeMutableRawPointer,
+                                                                                         _ pointer: UnsafeMutableRawPointer,
+                                                                                         _ size: Int) -> Void) -> Void = { instanceSession, context, callback in
+        return instanceSession.pointee.context.toInstance().cameraInstance.registerPixelbufferCallback(context: context,
+                                                                                                       callback: callback)
     }
 
     internal var startCapture: @convention(c) (UnsafeMutablePointer <vcdi_instance_session_t>) -> Bool = { instanceSession in

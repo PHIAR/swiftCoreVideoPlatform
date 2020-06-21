@@ -20,6 +20,16 @@ typedef enum video_ioctl_request_e {
 
 // Convenience helpers
 
+static inline fd_set
+get_fd_set(int32_t fd)
+{
+    fd_set fds;
+
+    FD_ZERO(&fds);
+    FD_SET(fd, &fds);
+    return fds;
+}
+
 static inline int32_t
 ioctl_1_arg(int32_t fd,
             video_ioctl_request_e request,

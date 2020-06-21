@@ -38,6 +38,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdlib.h>
 #include "CompilerDefinitions.h"
 
 NONNULL_BEGIN
@@ -48,6 +49,10 @@ typedef enum vcdi_instance_type_e {
     // Vendor driver instance is a color camera
     vcdi_instance_type_hardware_color_camera = 1,
 } vcdi_instance_type_e;
+
+typedef void (vcdi_camera_callback_t)(void *context,
+                                      void *pointer,
+                                      size_t size);
 
 typedef struct vcdi_instance_session_t {
     // Vendor driver context
@@ -64,7 +69,9 @@ typedef struct vcdi_instance_session_t {
     void (* NULL_UNSPECIFIED close_session)(struct vcdi_instance_session_t *session);
 
     // Pixel buffer capture callback
-    void (* NULL_UNSPECIFIED register_camera_callback)(void);
+    void (* NULL_UNSPECIFIED register_camera_callback)(struct vcdi_instance_session_t *session,
+                                                       void *context,
+                                                       vcdi_camera_callback_t *callback);
 } vcdi_instance_session_t;
 
 typedef bool (vcdi_instance_requestion_authorization_t)(void *context);
