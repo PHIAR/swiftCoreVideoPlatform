@@ -111,8 +111,6 @@ internal final class CameraInstance {
             preconditionFailure("Failed to query device format.")
         }
 
-        print(format.fmt.pix)
-
         var requestBuffers = v4l2_requestbuffers()
 
         requestBuffers.type = UInt32(V4L2_BUF_TYPE_VIDEO_CAPTURE.rawValue)
