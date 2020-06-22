@@ -1,6 +1,9 @@
 import swiftSDL2
 import AVFoundation
 import Foundation
+
+#if os(Android) || os(Linux)
+
 import CVideoCaptureDriverInterface
 
 private extension UnsafeMutableRawPointer {
@@ -91,11 +94,11 @@ instanceSession.register_camera_callback(&instanceSession,
                                          cameraCallback)
 
 let _ = instanceSession.start_capture(&instanceSession)
-let window = Window(title: "Hello World!",
+let window = Window(title: "Camera Concept",
                     x: 0,
                     y: 0,
                     width: 640,
-                    height: 480,
+                    height: 360,
                     flags: .shown)
 
 SDL2.eventLoop { event in
@@ -113,3 +116,26 @@ SDL2.eventLoop { event in
 let _ = instanceSession.stop_capture(&instanceSession)
 
 instanceSession.close_session(&instanceSession)
+
+#else
+
+let window = Window(title: "Camera Concept",
+                            x: 0,
+                            y: 0,
+                            width: 640,
+                            height: 360,
+                            flags: .shown)
+
+SDL2.eventLoop { event in
+    switch event.type {
+    case SDL_KEYDOWN.rawValue:
+        return false
+
+    default:
+        break
+    }
+
+    return true
+}
+
+#endif
