@@ -34,7 +34,14 @@ internal final class RuntimeInstance {
 print("Camera Concept Test Application")
 
 private let runtimeInstance = RuntimeInstance()
-private let library = dlopen("libVCDI_V4L2.so", RTLD_NOW)
+
+#if os(iOS) || os(tvOS) || os(macOS)
+private let libraryName = "libVCDI_V4L2.dylib"
+#elseif os(Android) || os(Linux)
+private let libraryName = "libVCDI_V4L2.so"
+#endif
+
+private let library = dlopen(libraryName, RTLD_NOW)
 private let entrypointPointer = dlsym(library, "vcdi_main")
 private let entrypoint = unsafeBitCast(entrypointPointer,
                                        to: (@convention (c) (UnsafeMutableRawPointer) -> Bool).self)
