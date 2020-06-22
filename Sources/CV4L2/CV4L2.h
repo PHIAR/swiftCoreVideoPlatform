@@ -1,5 +1,7 @@
 #pragma once
 
+#ifdef __linux__
+
 #include <stdint.h>
 #include <linux/videodev2.h>
 #include <sys/ioctl.h>
@@ -37,3 +39,5 @@ ioctl_1_arg(int32_t fd,
 {
     return ioctl(fd, request, argument);
 }
+
+#endif

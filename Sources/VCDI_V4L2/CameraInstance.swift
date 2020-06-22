@@ -3,6 +3,8 @@ import CV4L2
 import Dispatch
 import Foundation
 
+#if os(Android) || os(Linux)
+
 internal final class CameraInstance {
     private typealias MappedBuffer = (pointer: UnsafeMutableRawPointer,
                                       size: Int)
@@ -220,3 +222,5 @@ internal final class CameraInstance {
                                          arg: &type) != -1
     }
 }
+
+#endif

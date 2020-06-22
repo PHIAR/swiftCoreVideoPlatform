@@ -1,6 +1,8 @@
 import CVideoCaptureDriverInterface
 import Foundation
 
+#if os(Android) || os(Linux)
+
 @_cdecl("vcdi_main")
 public func vcdi_main(_ instance: UnsafeMutablePointer <vcdi_instance_t>) {
     let registerInstance = instance.pointee.register_instance
@@ -16,3 +18,5 @@ public func vcdi_main(_ instance: UnsafeMutablePointer <vcdi_instance_t>) {
 
     precondition(registeredInstance, "Failed to register driver instance.")
 }
+
+#endif

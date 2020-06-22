@@ -1,5 +1,8 @@
 import CVideoCaptureDriverInterface
 import Foundation
+
+#if os(Android) || os(Linux)
+
 import Glibc
 
 private extension UnsafeMutableRawPointer {
@@ -90,3 +93,5 @@ internal final class VCDIInstance {
         free(self._vendorName)
     }
 }
+
+#endif
