@@ -167,10 +167,10 @@ private extension UnsafeMutableRawPointer {
 
 internal extension AVCaptureDevice {
     func startCapture() {
-        self.instanceSession.start_capture(&self.instanceSession)
+        let _ = self.instanceSession.start_capture(&self.instanceSession)
     }
 
     func stopCapture() {
-        self.instanceSession.stop_capture(&self.instanceSession)
+        let _ = self.instanceSession.stop_capture(&self.instanceSession)
     }
 }
