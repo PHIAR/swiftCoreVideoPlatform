@@ -76,20 +76,45 @@ var instanceSession = vcdi_instance_session_t()
 result = runtimeRegistrationData.open_session(runtimeRegistrationData.context, &instanceSession)
 precondition(result)
 
-var frameIndex = 0
+SDL2.initialize(flags: .everything)
+
+let windowWidth = 1280
+let windowHeight = 720
+var flags = [
+    Window.Flags.shown
+]
+
+#if os(iOS) || os(macOS) || os(tvOS)
+flags.append(.metal)
+#else
+flags.append(.opengl)
+#endif
+
+let window = Window(title: "Camera Concept",
+                    x: 0,
+                    y: 0,
+                    width: windowWidth,
+                    height: windowHeight,
+                    flags: [
+                        .metal,
+                        .shown,
+                    ])
+let renderer = window.createRenderer(index: 0)
+let texture = renderer.createTexture(pixelformat: .bgra32,
+                                     textureAccess: .streaming,
+                                     width: windowWidth,
+                                     height: windowHeight)
 let cameraCallback: @convention(c) (_ context: UnsafeMutableRawPointer,
                                     _ pointer: UnsafeMutableRawPointer,
                                     _ size: Int) -> Void = { context, pointer, size in
-    guard frameIndex < 10 else {
-        return
+    DispatchQueue.main.sync {
+        let cameraCaptureBufferHeight = 720
+
+        texture.update(pixels: pointer,
+                       pitch: size / cameraCaptureBufferHeight)
+        renderer.copy(texture: texture)
+        renderer.present()
     }
-
-    let data = Data(bytes: pointer,
-                    count: size)
-    let url = URL(fileURLWithPath: "frame\(frameIndex).yuv")
-
-    try! data.write(to: url)
-    frameIndex += 1
 }
 
 instanceSession.register_camera_callback(&instanceSession,
@@ -97,12 +122,6 @@ instanceSession.register_camera_callback(&instanceSession,
                                          cameraCallback)
 
 let _ = instanceSession.start_capture(&instanceSession)
-let window = Window(title: "Camera Concept",
-                    x: 0,
-                    y: 0,
-                    width: 640,
-                    height: 360,
-                    flags: .shown)
 
 SDL2.eventLoop { event in
     switch event.type {
