@@ -95,7 +95,14 @@ let window = Window(title: "Camera Concept",
                     height: windowHeight,
                     flags: flags)
 let renderer = window.createRenderer(index: 0)
-let texture = renderer.createTexture(pixelformat: .bgra32,
+
+#if os(iOS) || os(macOS) || os(tvOS)
+let pixelformat: Texture.Pixelformat = .nv12
+#elseif os(Android) || os(Linux)
+let pixelformat: Texture.Pixelformat = .yvyu
+#endif
+
+let texture = renderer.createTexture(pixelformat: pixelformat,
                                      textureAccess: .streaming,
                                      width: windowWidth,
                                      height: windowHeight)
@@ -103,10 +110,14 @@ let cameraCallback: @convention(c) (_ context: UnsafeMutableRawPointer,
                                     _ pointer: UnsafeMutableRawPointer,
                                     _ size: Int) -> Void = { context, pointer, size in
     DispatchQueue.main.sync {
-        let cameraCaptureBufferHeight = 720
+    #if os(iOS) || os(macOS) || os(tvOS)
+        let pitch = 1280
+    #elseif os(Android) || os(Linux)
+        let pitch = 1280 * 2
+    #endif
 
         texture.update(pixels: pointer,
-                       pitch: size / cameraCaptureBufferHeight)
+                       pitch: pitch)
         renderer.copy(texture: texture)
         renderer.present()
     }
