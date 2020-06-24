@@ -3,8 +3,6 @@ import swiftSDL2
 import AVFoundation
 import Foundation
 
-#if os(Android) || os(Linux)
-
 import CVideoCaptureDriverInterface
 
 private extension UnsafeMutableRawPointer {
@@ -40,12 +38,16 @@ print("Camera Concept Test Application")
 private let runtimeInstance = RuntimeInstance()
 
 #if os(iOS) || os(tvOS) || os(macOS)
-private let libraryName = "libVCDI_V4L2.dylib"
+private let libraryName = "libVCDI_Darwin.dylib"
 #elseif os(Android) || os(Linux)
 private let libraryName = "libVCDI_V4L2.so"
 #endif
 
-private let library = dlopen(libraryName, RTLD_NOW)
+guard let library = dlopen(libraryName, RTLD_NOW) else {
+    print("Driver \(libraryName) not found.")
+    exit(1)
+}
+
 private let entrypointPointer = dlsym(library, "vcdi_main")
 private let entrypoint = unsafeBitCast(entrypointPointer,
                                        to: (@convention (c) (UnsafeMutableRawPointer) -> Bool).self)
@@ -63,6 +65,8 @@ private var instance = vcdi_instance_t(instance_handle: runtimeInstance.toUnsafe
                                        register_instance: registerInstance)
 
 var result = entrypoint(&instance)
+
+#if os(Android) || os(Linux)
 
 result = runtimeRegistrationData.request_authorization(runtimeRegistrationData.context)
 precondition(result)
