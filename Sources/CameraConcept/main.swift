@@ -92,11 +92,11 @@ instanceSession.register_camera_callback(&instanceSession,
 
 let _ = instanceSession.start_capture(&instanceSession)
 let window = Window(title: "Hello World!",
-                            x: 0,
-                            y: 0,
-                            width: 640,
-                            height: 480,
-                            flags: .shown)
+                    x: 0,
+                    y: 0,
+                    width: 640,
+                    height: 480,
+                    flags: .shown)
 
 SDL2.eventLoop { event in
     switch event.type {
