@@ -66,8 +66,6 @@ private var instance = vcdi_instance_t(instance_handle: runtimeInstance.toUnsafe
 
 var result = entrypoint(&instance)
 
-#if os(Android) || os(Linux)
-
 result = runtimeRegistrationData.request_authorization(runtimeRegistrationData.context)
 precondition(result)
 
@@ -121,26 +119,3 @@ SDL2.eventLoop { event in
 let _ = instanceSession.stop_capture(&instanceSession)
 
 instanceSession.close_session(&instanceSession)
-
-#else
-
-let window = Window(title: "Camera Concept",
-                            x: 0,
-                            y: 0,
-                            width: 640,
-                            height: 360,
-                            flags: .shown)
-
-SDL2.eventLoop { event in
-    switch event.type {
-    case SDL_KEYDOWN.rawValue:
-        return false
-
-    default:
-        break
-    }
-
-    return true
-}
-
-#endif
