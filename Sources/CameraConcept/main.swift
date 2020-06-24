@@ -80,14 +80,12 @@ SDL2.initialize(flags: .everything)
 
 let windowWidth = 1280
 let windowHeight = 720
-var flags = [
-    Window.Flags.shown
-]
+var flags = Window.Flags.shown
 
 #if os(iOS) || os(macOS) || os(tvOS)
-flags.append(.metal)
+flags.insert(.metal)
 #else
-flags.append(.opengl)
+flags.insert(.opengl)
 #endif
 
 let window = Window(title: "Camera Concept",
@@ -95,10 +93,7 @@ let window = Window(title: "Camera Concept",
                     y: 0,
                     width: windowWidth,
                     height: windowHeight,
-                    flags: [
-                        .metal,
-                        .shown,
-                    ])
+                    flags: flags)
 let renderer = window.createRenderer(index: 0)
 let texture = renderer.createTexture(pixelformat: .bgra32,
                                      textureAccess: .streaming,
