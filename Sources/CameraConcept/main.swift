@@ -99,7 +99,7 @@ let renderer = window.createRenderer(index: 0)
 #if os(iOS) || os(macOS) || os(tvOS)
 let pixelformat: Texture.Pixelformat = .nv12
 #elseif os(Android) || os(Linux)
-let pixelformat: Texture.Pixelformat = .yvyu
+let pixelformat: Texture.Pixelformat = .yuy2
 #endif
 
 let texture = renderer.createTexture(pixelformat: pixelformat,
@@ -109,18 +109,16 @@ let texture = renderer.createTexture(pixelformat: pixelformat,
 let cameraCallback: @convention(c) (_ context: UnsafeMutableRawPointer,
                                     _ pointer: UnsafeMutableRawPointer,
                                     _ size: Int) -> Void = { context, pointer, size in
-    DispatchQueue.main.sync {
-    #if os(iOS) || os(macOS) || os(tvOS)
-        let pitch = 1280
-    #elseif os(Android) || os(Linux)
-        let pitch = 1280 * 2
-    #endif
+#if os(iOS) || os(macOS) || os(tvOS)
+    let pitch = 1280
+#elseif os(Android) || os(Linux)
+    let pitch = 1280 * 2
+#endif
 
-        texture.update(pixels: pointer,
-                       pitch: pitch)
-        renderer.copy(texture: texture)
-        renderer.present()
-    }
+    texture.update(pixels: pointer,
+                   pitch: pitch)
+    renderer.copy(texture: texture)
+    renderer.present()
 }
 
 instanceSession.register_camera_callback(&instanceSession,

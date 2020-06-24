@@ -48,6 +48,7 @@ internal final class CameraInstance {
             self.stopSynchronizer.leave()
             return true
         }) {
+            let fd = self.fd
             var timeVal = timeval()
             var fds = get_fd_set(fd);
 
