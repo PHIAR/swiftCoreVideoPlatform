@@ -1,0 +1,5 @@
+module CNDKCamera2 {
+    umbrella header "CNDKCamera2.h"
+    export *
+    module * { export * }
+}

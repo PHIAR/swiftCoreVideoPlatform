@@ -1,3 +1,4 @@
+import CNDKCamera2
 import CVideoCaptureDriverInterface
 
 @_cdecl("vcdi_main")

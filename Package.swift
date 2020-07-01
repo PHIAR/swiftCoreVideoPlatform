@@ -60,6 +60,7 @@ let package = Package(name: "CoreVideo",
                                    .branch("master")),
                       ],
                       targets: [
+                          .systemLibrary(name: "CNDKCamera2"),
                           .systemLibrary(name: "CV4L2"),
                           .target(name: "AVFoundation",
                                   dependencies: [
@@ -84,6 +85,7 @@ let package = Package(name: "CoreVideo",
                                   ]),
                           .target(name: "VCDI_NDKCamera2",
                                   dependencies: [
+                                      "CNDKCamera2",
                                       "CVideoCaptureDriverInterface",
                                   ]),
                           .target(name: "VCDI_V4L2",
