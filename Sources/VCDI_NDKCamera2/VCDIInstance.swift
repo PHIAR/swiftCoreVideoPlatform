@@ -25,7 +25,6 @@ internal extension VCDIInstance {
     }
 }
 
-
 internal final class VCDIInstance {
     private let instanceHandle: UnsafeMutableRawPointer
     private let cameraInstance: CameraInstance

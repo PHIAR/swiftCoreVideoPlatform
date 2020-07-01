@@ -25,7 +25,6 @@ internal extension VCDIInstance {
     }
 }
 
-
 internal final class VCDIInstance {
     private static let defaultVideoNode = 0
     private static let defaultDeviceNode = "/dev/video\(VCDIInstance.defaultVideoNode)"
