@@ -18,6 +18,8 @@ public final class AVCaptureSession {
     }
 
     private let executionQueue = DispatchQueue(label: "AVCaptureSession.executionQueue")
+    private var configurationIsBeingChanged = false
+    private var captureConnections: [AVCaptureConnection] = []
     private var inputs: [AVCaptureInput] = []
     private var outputs: [AVCaptureOutput] = []
 
@@ -35,36 +37,61 @@ public final class AVCaptureSession {
     }
 
     public func addInput(_ input: AVCaptureInput) {
+        precondition(self.configurationIsBeingChanged)
+
         self.executionQueue.sync {
             self.inputs.append(input)
         }
     }
 
     public func addOutput(_ output: AVCaptureOutput) {
+        precondition(self.configurationIsBeingChanged)
+
         self.executionQueue.sync {
             self.outputs.append(output)
         }
     }
 
     public func beginConfiguration() {
+        self.configurationIsBeingChanged = true
     }
 
     public func canAddInput(_ input: AVCaptureInput) -> Bool {
+        precondition(self.configurationIsBeingChanged)
+
         return true
     }
 
     public func canAddOutput(_ input: AVCaptureOutput) -> Bool {
+        precondition(self.configurationIsBeingChanged)
+
         return true
     }
 
     public func commitConfiguration() {
+        self.configurationIsBeingChanged = false
+
+        self.inputs.forEach { input in
+            self.outputs.forEach { output in
+                let captureConnection = AVCaptureConnection(captureInput: input,
+                                                            captureOutput: output)
+
+                self.captureConnections.append(captureConnection)
+            }
+        }
     }
 
     public func startRunning() {
-        self.inputs.forEach { $0.startCapture() }
+        precondition(!self.configurationIsBeingChanged)
+
+        self.inputs.forEach { input in
+            input.startCapture()
+        }
     }
 
     public func stopRunning() {
+        precondition(!self.configurationIsBeingChanged)
+
         self.inputs.forEach { $0.stopCapture() }
     }
 }
