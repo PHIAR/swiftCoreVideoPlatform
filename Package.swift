@@ -72,7 +72,6 @@ let package = Package(name: "CoreVideo",
                                       "swiftNuklear",
                                       "swiftSDL2",
                                       "AVFoundation",
-                                      "CVideoCaptureDriverInterface",
                                   ]),
                           .target(name: "CoreMedia",
                                   dependencies: [
