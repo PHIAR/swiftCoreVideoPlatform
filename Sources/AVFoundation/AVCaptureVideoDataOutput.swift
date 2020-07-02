@@ -2,13 +2,15 @@ import Dispatch
 import Foundation
 
 public final class AVCaptureVideoDataOutput: AVCaptureOutput {
-    public var videoSettings: [String : Any]! {
+    private var _videoSettings: [String: Any] = [:]
+
+    public var videoSettings: [String: Any]! {
         get {
-            preconditionFailure()
+            return self._videoSettings
         }
 
         set {
-            preconditionFailure()
+            self._videoSettings = newValue
         }
     }
 

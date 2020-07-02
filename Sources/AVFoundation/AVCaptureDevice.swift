@@ -8,6 +8,12 @@ public enum AVMediaType {
 }
 
 public final class AVCaptureDevice {
+#if os(iOS) || os(tvOS) || os(macOS)
+    private static let libraryName = "libVCDI_Darwin.dylib"
+#elseif os(Android) || os(Linux)
+    private static let libraryName = "libVCDI_V4L2.so"
+#endif
+
     public enum Position {
         case unspecified
         case back
@@ -47,7 +53,10 @@ public final class AVCaptureDevice {
         public convenience init(deviceTypes: [AVCaptureDevice.DeviceType],
                                 mediaType: AVMediaType?,
                                 position: AVCaptureDevice.Position) {
-            let library = dlopen("libVCDI_V4L2.so", RTLD_NOW)
+            guard let library = dlopen(AVCaptureDevice.libraryName, RTLD_NOW) else {
+                preconditionFailure("Driver \(AVCaptureDevice.libraryName) not found.")
+            }
+
             let entrypoint = unsafeBitCast(dlsym(library, "vcdi_main"),
                                            to: (@convention (c) (UnsafeMutableRawPointer) -> Bool).self)
             let devices = [
