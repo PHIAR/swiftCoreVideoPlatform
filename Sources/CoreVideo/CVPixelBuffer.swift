@@ -8,10 +8,10 @@ public final class CVPixelBuffer: CVBuffer {
     internal let baseAddress: UnsafeMutableRawPointer?
     internal let dataSize: Int
 
-    internal init(width: Int = 0,
-                  height: Int = 0,
-                  baseAddress: UnsafeMutableRawPointer? = nil,
-                  dataSize: Int = 0) {
+    public init(width: Int = 0,
+                height: Int = 0,
+                baseAddress: UnsafeMutableRawPointer? = nil,
+                dataSize: Int = 0) {
         self.width = width
         self.height = height
         self.baseAddress = baseAddress
