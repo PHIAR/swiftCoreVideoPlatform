@@ -1,80 +1,29 @@
-import swiftNuklear
 import swiftSDL2
 import AVFoundation
+import CoreMedia
+import CoreVideo
 import Foundation
 
-import CVideoCaptureDriverInterface
+internal final class CaptureDelegate: NSObject,
+                                      AVCaptureVideoDataOutputSampleBufferDelegate {
+    public typealias PixelbufferCallback = (CVPixelBuffer) -> Void
 
-private extension UnsafeMutableRawPointer {
-    func toRuntimeInstance(retained: Bool = false) -> RuntimeInstance {
-        guard retained else {
-            return Unmanaged <RuntimeInstance>.fromOpaque(UnsafeRawPointer(self)!).takeUnretainedValue()
+    private let callback: PixelbufferCallback
+
+    public init(callback: @escaping PixelbufferCallback) {
+        self.callback = callback
+    }
+
+    public func captureOutput(_ output: AVCaptureOutput,
+                              didOutput sampleBuffer: CMSampleBuffer,
+                              from connection: AVCaptureConnection) {
+        guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else {
+            return
         }
 
-        return Unmanaged <RuntimeInstance>.fromOpaque(UnsafeRawPointer(self)!).takeRetainedValue()
+        self.callback(pixelBuffer)
     }
 }
-
-internal extension RuntimeInstance {
-    func toUnsafeMutableRawPointer(retained: Bool = false) -> UnsafeMutableRawPointer {
-        guard retained else {
-            return UnsafeMutableRawPointer(Unmanaged.passUnretained(self).toOpaque())
-        }
-
-        return UnsafeMutableRawPointer(Unmanaged.passRetained(self).toOpaque())
-    }
-}
-
-internal final class RuntimeInstance {
-    internal init() {
-    }
-
-    internal func run() {
-    }
-}
-
-print("Camera Concept Test Application")
-
-private let runtimeInstance = RuntimeInstance()
-
-#if os(iOS) || os(tvOS) || os(macOS)
-private let libraryName = "libVCDI_Darwin.dylib"
-#elseif os(Android) || os(Linux)
-private let libraryName = "libVCDI_V4L2.so"
-#endif
-
-guard let library = dlopen(libraryName, RTLD_NOW) else {
-    print("Driver \(libraryName) not found.")
-    exit(1)
-}
-
-private let entrypointPointer = dlsym(library, "vcdi_main")
-private let entrypoint = unsafeBitCast(entrypointPointer,
-                                       to: (@convention (c) (UnsafeMutableRawPointer) -> Bool).self)
-private var runtimeRegistrationData = vcdi_instance_registration_data_t()
-
-private let registerInstance: @convention(c) (UnsafeMutableRawPointer,
-                                              UnsafeMutablePointer <vcdi_instance_registration_data_t>) -> Bool = { runtimeInstance, registrationData in
-    let _ = runtimeInstance.toRuntimeInstance()
-
-    runtimeRegistrationData = registrationData.pointee
-    return true
-}
-
-private var instance = vcdi_instance_t(instance_handle: runtimeInstance.toUnsafeMutableRawPointer(),
-                                       register_instance: registerInstance)
-
-var result = entrypoint(&instance)
-
-result = runtimeRegistrationData.request_authorization(runtimeRegistrationData.context)
-precondition(result)
-
-print(String(format: "Device name: %s", runtimeRegistrationData.vendor_name))
-
-var instanceSession = vcdi_instance_session_t()
-
-result = runtimeRegistrationData.open_session(runtimeRegistrationData.context, &instanceSession)
-precondition(result)
 
 SDL2.initialize(flags: .everything)
 
@@ -106,9 +55,48 @@ let texture = renderer.createTexture(pixelformat: pixelformat,
                                      textureAccess: .streaming,
                                      width: windowWidth,
                                      height: windowHeight)
-let cameraCallback: @convention(c) (_ context: UnsafeMutableRawPointer,
-                                    _ pointer: UnsafeMutableRawPointer,
-                                    _ size: Int) -> Void = { context, pointer, size in
+
+var granted = false
+let group = DispatchGroup()
+
+group.enter()
+AVCaptureDevice.requestAccess(for: .video) { _granted in
+    granted = _granted
+    group.leave()
+}
+
+group.wait()
+
+guard granted else {
+    exit(1)
+}
+
+let captureDevices = AVCaptureDevice.DiscoverySession(deviceTypes: [
+                                                          .builtInWideAngleCamera,
+                                                      ],
+                                                      mediaType: .video,
+                                                      position: .back).devices
+
+guard let captureDevice = captureDevices.first else {
+    exit(1)
+}
+
+let captureSession = AVCaptureSession()
+
+captureSession.beginConfiguration()
+
+let captureInput = try! AVCaptureDeviceInput(device: captureDevice)
+let outputData = AVCaptureVideoDataOutput()
+
+outputData.videoSettings = [
+    String(kCVPixelBufferPixelFormatTypeKey): kCVPixelFormatType_420YpCbCr8BiPlanarFullRange,
+]
+
+let executionQueue = DispatchQueue(label: "CaptureDelegate.executionQueue")
+let captureDelegate = CaptureDelegate() { pixelBuffer in
+    let _ = CVPixelBufferLockBaseAddress(pixelBuffer, .readOnly)
+    let pointer = CVPixelBufferGetBaseAddress(pixelBuffer)!
+
 #if os(iOS) || os(macOS) || os(tvOS)
     let pitch = 1280
 #elseif os(Android) || os(Linux)
@@ -119,13 +107,23 @@ let cameraCallback: @convention(c) (_ context: UnsafeMutableRawPointer,
                    pitch: pitch)
     renderer.copy(texture: texture)
     renderer.present()
+
+    let _ = CVPixelBufferUnlockBaseAddress(pixelBuffer, .readOnly)
 }
 
-instanceSession.register_camera_callback(&instanceSession,
-                                         UnsafeMutableRawPointer(bitPattern: 1)!,
-                                         cameraCallback)
+outputData.setSampleBufferDelegate(captureDelegate,
+                                   queue: executionQueue)
 
-let _ = instanceSession.start_capture(&instanceSession)
+guard captureSession.canAddInput(captureInput),
+      captureSession.canAddOutput(outputData) else {
+    captureSession.commitConfiguration()
+    exit(1)
+}
+
+captureSession.addInput(captureInput)
+captureSession.addOutput(outputData)
+captureSession.commitConfiguration()
+        captureSession.startRunning()
 
 SDL2.eventLoop { event in
     switch event.type {
@@ -139,6 +137,4 @@ SDL2.eventLoop { event in
     return true
 }
 
-let _ = instanceSession.stop_capture(&instanceSession)
-
-instanceSession.close_session(&instanceSession)
+captureSession.stopRunning()

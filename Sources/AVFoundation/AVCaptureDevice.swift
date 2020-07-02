@@ -8,6 +8,9 @@ public enum AVMediaType {
 }
 
 public final class AVCaptureDevice {
+    public typealias CameraCallback = (_ pointer: UnsafeMutableRawPointer,
+                                       _ size: Int) -> Void
+
 #if os(iOS) || os(tvOS) || os(macOS)
     private static let libraryName = "libVCDI_Darwin.dylib"
 #elseif os(Android) || os(Linux)
@@ -87,6 +90,7 @@ public final class AVCaptureDevice {
 
     private var runtimeRegistrationData = vcdi_instance_registration_data_t()
     private var instanceSession = vcdi_instance_session_t()
+    private var cameraCallback: CameraCallback? = nil
 
     public var activeFormat: AVCaptureDevice.Format {
         get {
@@ -175,6 +179,23 @@ private extension UnsafeMutableRawPointer {
 }
 
 internal extension AVCaptureDevice {
+    private static let cameraCallback: @convention(c) (_ context: UnsafeMutableRawPointer,
+                                                       _ pointer: UnsafeMutableRawPointer,
+                                                       _ size: Int) -> Void = { context, pointer, size in
+        let captureDevice = context.toAVCaptureDevice()
+
+        captureDevice.cameraCallback?(pointer, size)
+    }
+
+    func register(cameraCallback: @escaping CameraCallback) {
+        self.cameraCallback = cameraCallback
+
+        let _ = self.instanceSession.register_camera_callback(&self.instanceSession,
+                                                              self.toUnsafeMutableRawPointer(),
+                                                              AVCaptureDevice.cameraCallback);
+
+    }
+
     func startCapture() {
         let _ = self.instanceSession.start_capture(&self.instanceSession)
     }
